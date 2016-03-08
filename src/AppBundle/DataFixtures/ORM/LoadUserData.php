@@ -12,21 +12,21 @@ class LoadUserData extends AbstractFixture implements OrderedFixtureInterface
 {
     public function load(ObjectManager $manager){
         $hakim = new User();
-        $hakim->setEmail('hakimoun@yahoo.fr');
-        $hakim->setPhone('0657120667');
+        $hakim->setEmail('hakimoun@yopmail.com');
+        $hakim->setPhone('098765432');
         $hakim->setFirstname('hakim');
         $hakim->setLastname('ould ahmed');
         $hakim->setImage("hakim.jpg");
 
         $invitee1 = new User();
-        $invitee1->setEmail("nacima@yahoo.fr");
+        $invitee1->setEmail("nacima@yopmail.com");
         $invitee1->setFirstname("nacima");
         $invitee1->setLastname("cherrak");
         $invitee1->setPhone(null);
         $invitee1->setImage("nacima.jpg");
 
         $invitee2 = new User();
-        $invitee2->setEmail("ariles@yahoo.fr");
+        $invitee2->setEmail("ariles@yopmail.com");
         $invitee2->setFirstname("ariles");
         $invitee2->setLastname("ould ahmed");
         $invitee2->setPhone(null);
