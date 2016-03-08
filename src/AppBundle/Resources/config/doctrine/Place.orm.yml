@@ -1,0 +1,39 @@
+AppBundle\Entity\Place:
+    type: entity
+    table: place
+    repositoryClass: AppBundle\Repository\PlaceRepository
+    oneToMany:
+      convergences:
+        targetEntity: AppBundle\Entity\Convergence
+        mappedBy: place
+    manyToOne:
+      creator:
+        targetEntity: AppBundle\Entity\User
+        inversedBy: places
+        joinColumn:
+          name: creator_id
+          referencedColumnName: id
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+    fields:
+        creationDate:
+            type: datetime
+            nullable: false
+        modificationDate:
+            type: datetime
+            nullable: true
+        name:
+            type: string
+            length: 100
+        googlePlaceJson:
+            type: text
+        lat:
+            type: string
+            length: 255
+            nullable: false
+        lng:
+            type: string
+            length: 100
+            nullable: false

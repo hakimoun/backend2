@@ -1,0 +1,42 @@
+AppBundle\Entity\Invitation:
+    type: entity
+    table: invitation
+    repositoryClass: AppBundle\Repository\InvitationRepository
+    manyToOne:
+        creator:
+          targetEntity: AppBundle\Entity\User
+          inversedBy: createdInvitations
+          joinColumn:
+            name: creator_id
+            referencedColumnName: id
+        user:
+          targetEntity: AppBundle\Entity\User
+          inversedBy: invitations
+          joinColumn:
+            name: user_id
+            referencedColumnName: id
+        convergence:
+          targetEntity: AppBundle\Entity\Convergence
+          inversedBy: invitations
+          joinColumn:
+            name: convergence_id
+            referencedColumnName: id
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+    fields:
+        creationDate:
+            type: datetime
+        modificationDate:
+            type: datetime
+            nullable: true
+        token:
+            type: string
+            length: 255
+            unique: true
+        message:
+            type: text
+        publicDescription:
+            type: text
+

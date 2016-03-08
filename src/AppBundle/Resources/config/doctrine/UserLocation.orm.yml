@@ -1,0 +1,28 @@
+AppBundle\Entity\UserLocation:
+    type: entity
+    table: user_location
+    repositoryClass: AppBundle\Repository\UserLocationRepository
+    manyToOne:
+        user:
+          targetEntity: AppBundle\Entity\User
+          inversedBy: locations
+          joinColumn:
+            name: user_id
+            referencedColumnName: id
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+    fields:
+        creationDate:
+            type: datetime
+            nullable: false
+        modificationDate:
+            type: datetime
+            nullable: true
+        lat:
+            type: string
+            length: 255
+        lng:
+            type: string
+            length: 255

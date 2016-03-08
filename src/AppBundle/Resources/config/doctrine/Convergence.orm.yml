@@ -1,0 +1,55 @@
+AppBundle\Entity\Convergence:
+    type: entity
+    table: convergence
+    repositoryClass: AppBundle\Repository\ConvergenceRepository
+    manyToOne:
+        place:
+            targetEntity: AppBundle\Entity\Place
+            inversedBy: convergences
+            joinColumn:
+                name: place_id
+                referencedColumnName: id
+        creator:
+            targetEntity: AppBundle\Entity\User
+            inversedBy: convergences
+            joinColumn:
+                name: creator_id
+                referencedColumnName: id
+    oneToMany:
+      invitations:
+            targetEntity: AppBundle\Entity\Invitation
+            mappedBy: convergence
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        creationDate:
+            type: datetime
+        modificationDate:
+            type: datetime
+            nullable: true
+        name:
+            type: string
+            length: 255
+            nullable: true
+        description:
+            type: text
+            nullable: true
+        tags:
+            type: string
+            length: 255
+            nullable: true
+        creatorToken:
+            type: string
+            length: 255
+            unique: true
+        when:
+            type: datetime
+            column: when_
+
+
+
+
