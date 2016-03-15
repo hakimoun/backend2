@@ -45,10 +45,11 @@ AppBundle\Entity\Convergence:
         creatorToken:
             type: string
             length: 255
-            unique: true
         when:
             type: datetime
             column: when_
+        is_active:
+            type: boolean
 
 
 

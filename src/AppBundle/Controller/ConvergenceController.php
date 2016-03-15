@@ -5,7 +5,7 @@ namespace AppBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class ConvergenceController extends Controller
@@ -16,19 +16,22 @@ class ConvergenceController extends Controller
     public function mineAction(Request $request)
     {
         $em = $this->get('doctrine')->getManager();
-        $response = new JsonResponse();
+
+        $serializer = $this->container->get('serializer');
         $convergences = null;
 
         $content = $request->getContent();
         if (!empty($content))
         {
             $params = json_decode($content, true);
-            $userToken = $params['token'];
+            $userToken = $params['userToken'];
             $convergences = $em->getRepository('AppBundle:Convergence')
-                ->findByCreator($userToken);
-
+                ->findBy(array("creatorToken"=>$userToken, 'is_active'=>true));
+            $jsonContent = $serializer->serialize($convergences, 'json');
         }
-        $response->setData($convergences);
+
+        $response = new Response(json_encode($jsonContent));
+        $response->headers->set('Content-Type', 'application/json');
 
         return $response;
     }
@@ -39,20 +42,21 @@ class ConvergenceController extends Controller
     public function invitationAction(Request $request)
     {
         $em = $this->get('doctrine')->getManager();
-        $response = new JsonResponse();
-        $convergences = [];
-
+        $serializer = $this->container->get('serializer');
 
         $content = $request->getContent();
         if (!empty($content))
         {
             $params = json_decode($content, true);
-            $userToken = $params['token'];
+            $userToken = $params['userToken'];
             $convergences = $em->getRepository('AppBundle:Convergence')
-                ->findByInvitation($userToken);
+                ->findByInvitation($userToken, true);
+            $jsonContent = $serializer->serialize($convergences, 'json');
 
         }
-        $response->setData($convergences);
+
+        $response = new Response(json_encode($jsonContent));
+        $response->headers->set('Content-Type', 'application/json');
 
         return $response;
     }
@@ -63,24 +67,25 @@ class ConvergenceController extends Controller
     public function historyAction(Request $request)
     {
         $em = $this->get('doctrine')->getManager();
-        $response = new JsonResponse();
-        $convergences = [];
-
+        $serializer = $this->container->get('serializer');
 
         $content = $request->getContent();
         if (!empty($content))
         {
             $params = json_decode($content, true);
-            $userToken = $params['token'];
+            $userToken = $params['userToken'];
 
-            //find all created
-            $convergences = $em->getRepository('AppBundle:Convergence')
-                ->findHistoryByCreator($userToken);
-            $convergences = $em->getRepository('AppBundle:Convergence')
-                ->findHistoryByInvitations($userToken);
+            $convergencesMine = $em->getRepository('AppBundle:Convergence')
+                ->findBy(array("creatorToken"=>$userToken, 'is_active'=>false));
+            $convergencesInvitations = $em->getRepository('AppBundle:Convergence')
+                ->findByInvitation($userToken, false);
+            $convergences = $convergencesMine + $convergencesInvitations;
+
+            $jsonContent = $serializer->serialize($convergences, 'json');
 
         }
-        $response->setData($convergences);
+        $response = new Response(json_encode($jsonContent));
+        $response->headers->set('Content-Type', 'application/json');
 
         return $response;
     }

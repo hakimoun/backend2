@@ -45,4 +45,8 @@ AppBundle\Entity\User:
         image:
             type: string
             length: 255
+        userToken:
+            type: string
+            length: 255
+
 

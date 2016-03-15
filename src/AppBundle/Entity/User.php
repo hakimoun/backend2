@@ -429,4 +429,33 @@ class User
     {
         return $this->createdInvitations;
     }
+    /**
+     * @var string
+     */
+    private $userToken;
+
+
+    /**
+     * Set userToken
+     *
+     * @param string $userToken
+     *
+     * @return User
+     */
+    public function setUserToken($userToken)
+    {
+        $this->userToken = $userToken;
+
+        return $this;
+    }
+
+    /**
+     * Get userToken
+     *
+     * @return string
+     */
+    public function getUserToken()
+    {
+        return $this->userToken;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace AppBundle\Repository;
 
+
 /**
  * ConvergenceRepository
  *
@@ -10,4 +11,19 @@ namespace AppBundle\Repository;
  */
 class ConvergenceRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findByInvitation($userToken, $isActive){
+        $em = $this->getEntityManager();
+        $query = $em->createQueryBuilder()
+            ->select('u')
+            ->from('AppBundle\Entity\User', 'u')
+            ->join('u.invitations', 'i')
+            ->join('i.convergence', 'c')
+            ->where("u.userToken = :userToken")
+            ->andWhere("c.is_active = :isActive")
+            ->getQuery();
+        $query->setParameter('userToken', $userToken);
+        $query->setParameter('isActive', $isActive);
+        $invitations = $query->getResult();
+        return $invitations;
+    }
 }

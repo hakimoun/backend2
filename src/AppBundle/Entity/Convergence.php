@@ -359,4 +359,33 @@ class Convergence
     {
         return $this->creatorToken;
     }
+    /**
+     * @var boolean
+     */
+    private $is_active;
+
+
+    /**
+     * Set isActive
+     *
+     * @param boolean $isActive
+     *
+     * @return Convergence
+     */
+    public function setIsActive($isActive)
+    {
+        $this->is_active = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean
+     */
+    public function getIsActive()
+    {
+        return $this->is_active;
+    }
 }
