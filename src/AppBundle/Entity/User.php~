@@ -458,4 +458,33 @@ class User
     {
         return $this->userToken;
     }
+    /**
+     * @var string
+     */
+    private $pseudo;
+
+
+    /**
+     * Set pseudo
+     *
+     * @param string $pseudo
+     *
+     * @return User
+     */
+    public function setPseudo($pseudo)
+    {
+        $this->pseudo = $pseudo;
+
+        return $this;
+    }
+
+    /**
+     * Get pseudo
+     *
+     * @return string
+     */
+    public function getPseudo()
+    {
+        return $this->pseudo;
+    }
 }

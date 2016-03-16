@@ -14,6 +14,7 @@ class LoadUserData extends AbstractFixture implements OrderedFixtureInterface
         $hakim = new User();
         $hakim->setEmail('hakimoun@yopmail.com');
         $hakim->setPhone('098765432');
+        $hakim->setPseudo('hakimoun');
         $hakim->setFirstname('hakim');
         $hakim->setLastname('ould ahmed');
         $hakim->setImage("hakim.jpg");
@@ -21,6 +22,7 @@ class LoadUserData extends AbstractFixture implements OrderedFixtureInterface
 
         $invitee1 = new User();
         $invitee1->setEmail("nacima@yopmail.com");
+        $invitee1->setPseudo("nacimoun");
         $invitee1->setFirstname("nacima");
         $invitee1->setLastname("cherrak");
         $invitee1->setPhone(null);
@@ -29,6 +31,7 @@ class LoadUserData extends AbstractFixture implements OrderedFixtureInterface
 
         $invitee2 = new User();
         $invitee2->setEmail("ariles@yopmail.com");
+        $invitee2->setPseudo("arilesoun");
         $invitee2->setFirstname("ariles");
         $invitee2->setLastname("ould ahmed");
         $invitee2->setPhone(null);
@@ -37,6 +40,7 @@ class LoadUserData extends AbstractFixture implements OrderedFixtureInterface
 
         $invitee3 = new User();
         $invitee3->setEmail("nacima@yahoo.fr");
+        $invitee3->setPseudo("louiseoun");
         $invitee3->setFirstname("louise");
         $invitee3->setLastname("ould ahmed");
         $invitee3->setPhone("0123456789");

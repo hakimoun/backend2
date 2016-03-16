@@ -29,12 +29,17 @@ AppBundle\Entity\User:
         modificationDate:
             type: datetime
             nullable: true
+        pseudo:
+            type: string
+            length: 100
         firstname:
             type: string
             length: 100
+            nullable: true
         lastname:
             type: string
             length: 100
+            nullable: true
         email:
             type: string
             length: 255
