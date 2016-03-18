@@ -104,12 +104,16 @@ class ConvergenceController extends Controller
         $serializer = $this->container->get('serializer');
 
         $content = $request->getContent();
-
+        if($request->getMethod() == Request::METHOD_OPTIONS)
+        {
+            print_r ('OK');exit;
+        }
         if (!empty($content))
         {
             $params = json_decode($content, true);
+
             $creator = $params['creator']; // pseudo, firstname, lastname, email, phone, lat, lng, image
-            $convergece = $params['information']; // name, description, image, tags
+            $convergence = $params['information']; // name, description, image, tags
             $place = $params['place'];//googlePlace, lat, lng, name
             $when = $params['when'];  //dateime
             $friends = $params['friends'];  //array of friend, each friend is : psueod, firstame, lastname, email,image
@@ -152,9 +156,9 @@ class ConvergenceController extends Controller
             $newConvergence = new Convergence();
             $newConvergence->setCreator($newCreator);
             $newConvergence->setPlace($newPlace);
-            $newConvergence->setName($convergece['name']);
-            $newConvergence->setDescription($convergece['description']);
-            $newConvergence->setTags($convergece['tags']);
+            $newConvergence->setName($convergence['name']);
+            $newConvergence->setDescription($convergence['description']);
+            $newConvergence->setTags($convergence['tags']);
             $newConvergence->setCreatorToken($newCreator->getUserToken());
             $newConvergence->setIsActive(true);
             $newConvergence->setWhen(new \DateTime($when));
@@ -176,7 +180,35 @@ class ConvergenceController extends Controller
 
         }
 
-        $jsonContent = $serializer->serialize($newConvergence, 'json');
+        $convergenceResponse = ["name"=>$newConvergence->getName(),
+                                "description"=>$newConvergence->getDescription(),
+                                "tags"=>$newConvergence->getTags()];
+        $convergenceResponse['place'] =[];
+        $convergenceResponse['place']['googlePlace'] = $newConvergence->getPlace()->getGooglePlaceJson();
+        $convergenceResponse['place']['name'] = $newConvergence->getPlace()->getName();
+        $convergenceResponse['place']['lat'] = $newConvergence->getPlace()->getLat();
+        $convergenceResponse['place']['lng'] = $newConvergence->getPlace()->getLng();
+        $convergenceResponse['creator'] =
+            [
+             "pseudo"=>$newConvergence->getCreator()->getPseudo(),
+             "firstname"=>$newConvergence->getCreator()->getFirstname(),
+             "lastname"=>$newConvergence->getCreator()->getLastname(),
+             "userToken"=>$newConvergence->getCreator()->getUserToken()
+            ];
+        $convergenceResponse["friends"] = [];
+        $invitations = $em->getRepository('AppBundle\Entity\Invitation')->findByConvergence($newConvergence);
+
+        foreach($invitations as $invitation){
+            $convergenceResponse["friends"][] =
+                [   "pseudo"=>$invitation->getUser()->getPseudo(),
+                    "image"=>$invitation->getUser()->getImage(),
+                    "description"=>$invitation->getPublicDescription(),
+                    "lat"=>0,//ici il faudra ajouter un chap lat, lng qui represente la derniere location du user
+                    "lng"=>0
+                ];
+        }
+
+        $jsonContent = $serializer->serialize($convergenceResponse, 'json');
 
         $response = new Response(json_encode($jsonContent));
         $response->headers->set('Content-Type', 'application/json');
@@ -187,4 +219,11 @@ class ConvergenceController extends Controller
     }
 
 
+    /**
+     * @Route("/convergence/update", name="update_convergence")
+     */
+    public function updateAction(Request $request){
+        //if user token is creator token
+
+    }
 }
