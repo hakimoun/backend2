@@ -53,5 +53,14 @@ AppBundle\Entity\User:
         userToken:
             type: string
             length: 255
-
-
+        lat:
+            type: string
+            length: 255
+            nullable: true
+        lng:
+            type: string
+            length: 255
+            nullable: true
+        locationUpdateDate:
+            type: datetime
+            nullable: true

@@ -487,4 +487,91 @@ class User
     {
         return $this->pseudo;
     }
+    /**
+     * @var string
+     */
+    private $lat;
+
+    /**
+     * @var string
+     */
+    private $lng;
+
+
+    /**
+     * Set lat
+     *
+     * @param string $lat
+     *
+     * @return User
+     */
+    public function setLat($lat)
+    {
+        $this->lat = $lat;
+
+        return $this;
+    }
+
+    /**
+     * Get lat
+     *
+     * @return string
+     */
+    public function getLat()
+    {
+        return $this->lat;
+    }
+
+    /**
+     * Set lng
+     *
+     * @param string $lng
+     *
+     * @return User
+     */
+    public function setLng($lng)
+    {
+        $this->lng = $lng;
+
+        return $this;
+    }
+
+    /**
+     * Get lng
+     *
+     * @return string
+     */
+    public function getLng()
+    {
+        return $this->lng;
+    }
+    /**
+     * @var \DateTime
+     */
+    private $locationUpdateDate;
+
+
+    /**
+     * Set locationUpdateDate
+     *
+     * @param \DateTime $locationUpdateDate
+     *
+     * @return User
+     */
+    public function setLocationUpdateDate($locationUpdateDate)
+    {
+        $this->locationUpdateDate = $locationUpdateDate;
+
+        return $this;
+    }
+
+    /**
+     * Get locationUpdateDate
+     *
+     * @return \DateTime
+     */
+    public function getLocationUpdateDate()
+    {
+        return $this->locationUpdateDate;
+    }
 }

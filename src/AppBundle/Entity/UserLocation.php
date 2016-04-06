@@ -38,9 +38,13 @@ class UserLocation
     private $user;
 
 
+    /**
+     * Constructor
+     */
     public function __construct()
     {
-        $this->creationDate = new \DateTime('now');
+        $this->creationDate = new \DateTime();
+
     }
 
     /**

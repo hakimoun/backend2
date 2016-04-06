@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Convergence;
 use AppBundle\Entity\Invitation;
+use AppBundle\Controller\OptionOkInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,14 +101,13 @@ class ConvergenceController extends Controller
      */
     public function createAction(Request $request)
     {
+        $convergenceResponse = null;
+
         $em = $this->get('doctrine')->getManager();
         $serializer = $this->container->get('serializer');
 
         $content = $request->getContent();
-        if($request->getMethod() == Request::METHOD_OPTIONS)
-        {
-            print_r ('OK');exit;
-        }
+
         if (!empty($content))
         {
             $params = json_decode($content, true);
@@ -126,6 +126,9 @@ class ConvergenceController extends Controller
             $newCreator->setEmail($creator['email']);
             $newCreator->setPhone($creator['phone']);
             $newCreator->setImage($creator['image']);
+            $newCreator->setLat($creator['lat']);
+            $newCreator->setLng($creator['lng']);
+            $newCreator->setLocationUpdateDate(new \DateTime());
             $newCreator->setUserToken(uniqid('user_'));
 
             $em->persist($newCreator);
@@ -178,34 +181,70 @@ class ConvergenceController extends Controller
 
             $em->flush();
 
+            $convergenceResponse = $this->getConvergenceDetail($newConvergence, $newCreator);
+            $userResponse = $this->getUserDetail($newCreator);
+
         }
 
-        $convergenceResponse = ["name"=>$newConvergence->getName(),
-                                "description"=>$newConvergence->getDescription(),
-                                "tags"=>$newConvergence->getTags()];
-        $convergenceResponse['place'] =[];
-        $convergenceResponse['place']['googlePlace'] = $newConvergence->getPlace()->getGooglePlaceJson();
-        $convergenceResponse['place']['name'] = $newConvergence->getPlace()->getName();
-        $convergenceResponse['place']['lat'] = $newConvergence->getPlace()->getLat();
-        $convergenceResponse['place']['lng'] = $newConvergence->getPlace()->getLng();
-        $convergenceResponse['creator'] =
-            [
-             "pseudo"=>$newConvergence->getCreator()->getPseudo(),
-             "firstname"=>$newConvergence->getCreator()->getFirstname(),
-             "lastname"=>$newConvergence->getCreator()->getLastname(),
-             "userToken"=>$newConvergence->getCreator()->getUserToken()
-            ];
-        $convergenceResponse["friends"] = [];
-        $invitations = $em->getRepository('AppBundle\Entity\Invitation')->findByConvergence($newConvergence);
+        $convergenceAndUserResponse['user'] = $userResponse;
+        $convergenceAndUserResponse['convergence'] = $convergenceResponse;
+        $jsonContent = $serializer->serialize($convergenceAndUserResponse, 'json');
 
-        foreach($invitations as $invitation){
-            $convergenceResponse["friends"][] =
-                [   "pseudo"=>$invitation->getUser()->getPseudo(),
-                    "image"=>$invitation->getUser()->getImage(),
-                    "description"=>$invitation->getPublicDescription(),
-                    "lat"=>0,//ici il faudra ajouter un chap lat, lng qui represente la derniere location du user
-                    "lng"=>0
-                ];
+        $response = new Response(json_encode($jsonContent));
+        $response->headers->set('Content-Type', 'application/json');
+
+
+        return $response;
+
+    }
+
+
+    /**
+     * @Route("/convergence/invitation/{code}", name="convergece_by_invitation")
+     */
+    public function convergenceByCodeAction($code){
+        $em = $this->get('doctrine')->getManager();
+        $serializer = $this->container->get('serializer');
+
+        $invitation = $em->getRepository('AppBundle:Invitation')
+            ->findOneBy(array("token"=>$code));
+
+        $user = $invitation->getUser();
+        $userResponse = $this->getUserDetail($user);
+
+        $convergence = $invitation->getConvergence();
+        $convergenceResponse = $this->getConvergenceDetail($convergence, $user);
+
+        $convergenceAndUserResponse['user'] = $userResponse;
+        $convergenceAndUserResponse['convergence'] = $convergenceResponse;
+        $jsonContent = $serializer->serialize($convergenceAndUserResponse, 'json');
+
+        $response = new Response(json_encode($jsonContent));
+        $response->headers->set('Content-Type', 'application/json');
+
+
+        return $response;
+
+    }
+
+    /**
+     * @Route("/convergence/{id}", name="convergece_by_id")
+     */
+    public function convergenceByIdAction(Request $request, $id){
+        $em = $this->get('doctrine')->getManager();
+        $serializer = $this->container->get('serializer');
+
+        $convergence = $em->getRepository('AppBundle:Convergence')
+            ->findOneBy(array("id"=>$id));
+
+        $content = $request->getContent();
+
+        if (!empty($content)) {
+            $params = json_decode($content, true);
+            $userToken = $params['userToken'];
+            $user = $em->getRepository('AppBundle:User')
+                ->findOneBy(array("userToken"=>$userToken));
+            $convergenceResponse = $this->getConvergenceDetail($convergence, $user);
         }
 
         $jsonContent = $serializer->serialize($convergenceResponse, 'json');
@@ -218,12 +257,83 @@ class ConvergenceController extends Controller
 
     }
 
-
     /**
      * @Route("/convergence/update", name="update_convergence")
      */
     public function updateAction(Request $request){
         //if user token is creator token
 
+    }
+
+    private function getConvergenceDetail($convergence, $currentUser){
+
+        $em = $this->get('doctrine')->getManager();
+
+        $convergenceResponse = [
+            "id"=>$convergence->getId(),
+            "name"=>$convergence->getName(),
+            "description"=>$convergence->getDescription(),
+            "tags"=>$convergence->getTags()];
+
+        $convergenceResponse['place'] =[];
+        $convergenceResponse['place']['googlePlace'] = $convergence->getPlace()->getGooglePlaceJson();
+        $convergenceResponse['place']['name'] = $convergence->getPlace()->getName();
+        $convergenceResponse['place']['lat'] = $convergence->getPlace()->getLat();
+        $convergenceResponse['place']['lng'] = $convergence->getPlace()->getLng();
+        $convergenceResponse['creator'] =
+            [
+                "pseudo"=>$convergence->getCreator()->getPseudo(),
+                "firstname"=>$convergence->getCreator()->getFirstname(),
+                "lastname"=>$convergence->getCreator()->getLastname(),
+            ];
+
+        $convergenceResponse["friends"] = [];
+
+        $invitations = $em->getRepository('AppBundle\Entity\Invitation')->findByConvergence($convergence);
+
+        foreach($invitations as $invitation){
+            $isCurrentUser = ($invitation->getUser()->getId() == $currentUser->getId());
+            $convergenceResponse["friends"][] =
+                [   "pseudo"=>$invitation->getUser()->getPseudo(),
+                    "image"=>$invitation->getUser()->getImage(),
+                    "description"=>$invitation->getPublicDescription(),
+                    "lat"=>$invitation->getUser()->getLat()?$invitation->getUser()->getLat():0,
+                    "lng"=>$invitation->getUser()->getLng()?$invitation->getUser()->getLng():0,
+                    "locationUpdateDate"=>$invitation->getUser()->getLocationUpdateDate(),
+                    "isCreator"=>false,
+                    "isCurrentUser"=>$isCurrentUser
+                ];
+        }
+
+        $convergenceResponse["friends"][] = [
+                    "pseudo"=>$convergence->getCreator()->getPseudo(),
+                    "image"=>$convergence->getCreator()->getImage(),
+                    "description"=>"",
+                    "lat"=>$convergence->getCreator()->getLat()?$convergence->getCreator()->getLat():0,
+                    "lng"=>$convergence->getCreator()->getLng()?$convergence->getCreator()->getLng():0,
+                    "locationUpdateDate"=>$convergence->getCreator()->getLocationUpdateDate(),
+                    "isCreator"=>true,
+                    "isCurrentUser"=>$convergence->getCreator()->getId() == $currentUser->getId()
+                ];
+
+        return $convergenceResponse;
+    }
+
+    private function getUserDetail($user){
+
+        $userResponse =
+            [   'pseudo' => $user->getPseudo() ,
+                'userToken' =>$user->getUserToken() ,
+                'email' => $user->getEmail() ,
+                'firstname' =>  $user->getFirstname() ,
+                'lastname' => $user->getLastname() ,
+                'image' => $user->getImage() ,
+                'phone' => $user->getPhone() ,
+                'lat' => $user->getLat()?$user->getLat():0,
+                'lng' => $user->getLng()?$user->getLng():0,
+                'locationUpdateDate' => $user->getLocationUpdateDate()
+            ];
+
+        return $userResponse;
     }
 }
